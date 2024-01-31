@@ -10,8 +10,11 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
+import mainStyles from "~/styles/main.css";
+
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: "stylesheet", href: mainStyles },
 ];
 
 export const meta: MetaFunction = () => {
