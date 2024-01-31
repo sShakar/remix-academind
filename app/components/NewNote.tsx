@@ -13,7 +13,7 @@ export default function NewNote() {
         <input type="text" id="title" name="title" required />
       </p>
       <p>
-        <label htmlFor="content">Title</label>
+        <label htmlFor="content">Content</label>
         <textarea id="content" name="content" rows={5} required />
       </p>
       <div className="form-actions">
