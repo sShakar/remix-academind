@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import type { INoteType } from "~/types/noteTypes";
 
 export async function getStoredNotes() {
   const rawFileContent = await fs.readFile("notes.json", { encoding: "utf-8" });
@@ -7,8 +8,6 @@ export async function getStoredNotes() {
   return storedNotes;
 }
 
-export function storeNotes(
-  notes: Array<{ id: string; title: string; content: string }>
-) {
+export function storeNotes(notes: INoteType[]) {
   return fs.writeFile("notes.json", JSON.stringify({ notes: notes || [] }));
 }
