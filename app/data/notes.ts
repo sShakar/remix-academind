@@ -4,8 +4,7 @@ import type { INoteType } from "~/types/noteTypes";
 export async function getStoredNotes() {
   const rawFileContent = await fs.readFile("notes.json", { encoding: "utf-8" });
   const data = JSON.parse(rawFileContent);
-  const storedNotes = data.notes ?? [];
-  return storedNotes;
+  return data.notes ?? [];
 }
 
 export function storeNotes(notes: INoteType[]) {

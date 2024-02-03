@@ -1,15 +1,13 @@
-import { redirect } from "@remix-run/node";
-import type { LinksFunction, ActionFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import {
+  useLoaderData,
+  useRouteError,
+  isRouteErrorResponse,
+} from "@remix-run/react";
 import { getStoredNotes, storeNotes } from "~/data/notes";
 import NewNote, { newNoteLinks } from "~/components/NewNote";
 import NoteList, { noteListLinks } from "~/components/NoteList";
 import type { INoteType } from "~/types/noteTypes";
-
-export const links: LinksFunction = () => [
-  ...newNoteLinks(),
-  ...noteListLinks(),
-];
 
 export default function Notes() {
   const notes: INoteType[] = useLoaderData();
@@ -22,8 +20,13 @@ export default function Notes() {
   );
 }
 
+export const links = () => [...newNoteLinks(), ...noteListLinks()];
+
 export async function loader() {
   const notes = await getStoredNotes();
+  if (!notes || notes.length === 0) {
+    throw json({ message: "No notes found" }, 404);
+  }
   return notes;
 }
 
@@ -31,12 +34,41 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const noteData = {
     id: new Date().toISOString(),
-    title: formData.get("title"),
-    content: formData.get("content"),
+    title: formData.get("title") as string,
+    content: formData.get("content") as string,
   };
+
+  if (noteData.title?.trim().length < 5) {
+    return { message: "Invalid title - must be at least 5 characters long" };
+  }
 
   const existingNotes = await getStoredNotes();
   const updatedNotes = [...existingNotes, noteData];
   await storeNotes(updatedNotes);
+  // await new Promise<void>((resolve) => setTimeout(() => resolve(), 2000));
   return redirect("/notes");
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError() as Error;
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <>
+        <NewNote />
+        <main className="info-message">
+          <h1>No notes found</h1>
+          <p>{error.message}</p>
+        </main>
+      </>
+    );
+  }
+
+  return (
+    <main className="error">
+      <h1>Uh oh ...</h1>
+      <p>Something went wrong.</p>
+      <pre>{error.message}</pre>
+    </main>
+  );
 }
